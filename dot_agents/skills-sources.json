@@ -1,0 +1,76 @@
+{
+  "$comment": "官方 skill 来源清单。sync-skills.js 读取本文件：逐源浅克隆/拉取上游，把每个已声明 skill 镜像为上游最新版到 ~/.agents/skills/ 与 chezmoi 源目录。上游已删除/废弃的 skill 列入 retired，会被同步删除；未声明的本地自建 skill 一律不动。",
+  "retired": {
+    "$comment": "mattpocock/skills 于 v1.3.0 (#1120) 删除 resolving-merge-conflicts，无替代品。",
+    "skills": ["resolving-merge-conflicts"]
+  },
+  "sources": [
+    {
+      "id": "mattpocock/skills",
+      "repo": "git@github.com:mattpocock/skills.git",
+      "cache": "mattpocock_skills",
+      "roots": [
+        "skills/engineering",
+        "skills/productivity",
+        "skills/misc",
+        "skills/in-progress"
+      ],
+      "exclude": [],
+      "skills": [
+        "ask-matt",
+        "code-review",
+        "codebase-design",
+        "diagnosing-bugs",
+        "domain-modeling",
+        "grill-me",
+        "grill-with-docs",
+        "grilling",
+        "handoff",
+        "implement",
+        "improve-codebase-architecture",
+        "prototype",
+        "research",
+        "setup-matt-pocock-skills",
+        "tdd",
+        "teach",
+        "to-spec",
+        "to-tickets",
+        "triage",
+        "wayfinder",
+        "writing-for-agents"
+      ]
+    },
+    {
+      "id": "vercel-labs/skills",
+      "repo": "git@github.com:vercel-labs/skills.git",
+      "cache": "vercel-labs_skills",
+      "roots": ["skills"],
+      "exclude": [],
+      "skills": ["find-skills"]
+    },
+    {
+      "id": "typesafe-ai/skills",
+      "repo": "git@github.com:typesafe-ai/skills.git",
+      "cache": "typesafe-ai_skills",
+      "roots": ["skills"],
+      "exclude": [],
+      "skills": ["typesafe-ai"]
+    },
+    {
+      "id": "charlie947/show-me",
+      "repo": "git@github.com:charlie947/show-me.git",
+      "cache": "charlie947_show-me",
+      "roots": ["skills"],
+      "exclude": [],
+      "skills": ["show-me"]
+    },
+    {
+      "id": "KKKKhazix/khazix-skills",
+      "repo": "git@github.com:KKKKhazix/khazix-skills.git",
+      "cache": "KKKKhazix_khazix-skills",
+      "roots": ["."],
+      "exclude": ["evals"],
+      "skills": ["neat-freak"]
+    }
+  ]
+}

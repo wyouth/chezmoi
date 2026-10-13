@@ -1,0 +1,2 @@
+# 防御:任何 skill 若内部混入 .git(克隆的仓库),不进 chezmoi
+dot_agents/skills/**/.git
