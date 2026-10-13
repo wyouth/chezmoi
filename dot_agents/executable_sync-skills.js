@@ -18,12 +18,25 @@ const { execSync } = require('child_process');
 const { ensureLinks } = require('./skill-links.js');
 
 const HOME = require('os').homedir();
-const skillsRoot = path.join(HOME, '.agents', 'skills');
-const manifestPath = path.join(HOME, '.agents', 'skills-sources.json');
+const agentsDir = path.join(HOME, '.agents');
+const skillsRoot = path.join(agentsDir, 'skills');
+const manifestPath = path.join(agentsDir, 'skills-sources.json');
 const cacheRoot = path.join(HOME, '.cache', 'skills-upstream');
 // chezmoi 默认源目录(本机未自定义 sourceDir)
 const sourceRoot = path.join(HOME, '.local', 'share', 'chezmoi');
 const sourceSkills = path.join(sourceRoot, 'dot_agents', 'skills');
+
+// ~/.agents 下的这些文件是「工作副本」，同步时镜像进 chezmoi 源目录，避免两份漂移
+// （chezmoi apply 在源与目标都不一致时会交互询问，漂移正是触发条件）。
+// 格式：[live 文件名, 源目录里的名字]
+const AGENT_FILES = [
+  ['README.md', 'README.md'],
+  ['skills-sources.json', 'skills-sources.json'],
+  ['skill-links.js', 'skill-links.js'],
+  ['sync-skills.js', 'executable_sync-skills.js'],
+  ['link-all.js', 'executable_link-all.js'],
+  ['link-skill.js', 'executable_link-skill.js'],
+];
 
 function sh(cmd) {
   return execSync(cmd, { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim();
@@ -114,9 +127,23 @@ for (const name of (manifest.retired && manifest.retired.skills) || []) {
 // 4. 三端软链对齐(补建新 skill,清除指向已删 skill 的悬挂链接)
 const links = ensureLinks({ pruneDangling: true });
 
-// 5. 纳入版本控制(原子处理增/改/删)
+// 5. 把 ~/.agents 下的工作副本镜像进 chezmoi 源（消除两份漂移）
+const mirrored = [];
+for (const [liveName, srcName] of AGENT_FILES) {
+  const live = path.join(agentsDir, liveName);
+  const src = path.join(sourceRoot, 'dot_agents', srcName);
+  if (!fs.existsSync(live)) continue;
+  const same = fs.existsSync(src) && fs.readFileSync(live).equals(fs.readFileSync(src));
+  if (same) continue;
+  fs.mkdirSync(path.dirname(src), { recursive: true });
+  fs.copyFileSync(live, src);
+  mirrored.push(srcName);
+  console.log('mirrored dot_agents/' + srcName);
+}
+
+// 6. 纳入版本控制(原子处理增/改/删)
 if (fs.existsSync(sourceSkills)) {
-  sh(`git -C "${sourceRoot}" add -A dot_agents/skills dot_agents/skills-sources.json`);
+  sh(`git -C "${sourceRoot}" add -A dot_agents`);
 }
 
 if (changed.size) console.log(`已更新 ${changed.size} 个官方 skill: ${[...changed].sort().join(', ')}`);
@@ -124,6 +151,7 @@ else console.log('所有官方 skill 已是最新,无变更。');
 if (removed.size) console.log(`已移除上游弃用的 skill: ${[...removed].sort().join(', ')}`);
 if (links.linked) console.log(`补建软链 ${links.linked} 个。`);
 if (links.pruned) console.log(`清除悬挂软链 ${links.pruned} 个。`);
+if (mirrored.length) console.log(`镜像到 chezmoi 源: ${mirrored.join(', ')}`);
 if (networkErrors.length) console.warn(`⚠️ 有源拉取失败(沿用缓存,可能非最新): ${networkErrors.join(', ')}`);
 
 if (process.argv.includes('--commit')) {
