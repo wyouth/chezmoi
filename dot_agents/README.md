@@ -41,31 +41,41 @@
 
 `chezmoi`（手动 `/chezmoi`，也可由模型在改全局配置前自动加载）是「改全局配置」的统一入口：改全局配置 / 全局规则（`~/.claude/CLAUDE.md`）/ agent 全局目录前都先走它，真身在 chezmoi 源目录 `~/.local/share/chezmoi`，`~` 下只是 apply 出来的副本。
 
-### 更新官方 skill（自动 + 手动）
+### 更新官方 skill（三种模式）
 
 ```bash
-# 手动（更新内容 + 对齐三端软链，不提交）
-node ~/.agents/sync-skills.js
+# 手动·本地为准（默认，add）：同步上游后跑 chezmoi add --force，把 ~/.agents 工作副本收进源并记账
+node ~/.agents/sync-skills.js --mode add
+node ~/.agents/sync-skills.js --mode add --push      # 跑完列改动 → 你确认 → 提交并推送
 
-# 手动并直接 commit
-node ~/.agents/sync-skills.js --commit
+# 手动·源为准（chezmoi）：同步上游写进源后跑 chezmoi apply --force，把源内容推到 ~
+node ~/.agents/sync-skills.js --mode chezmoi
 
-# 自动：chezmoi apply 时由 run_sync-skills.ps1 触发
+# 自动：chezmoi apply 时由 run_sync-skills.ps1 以 --mode raw 触发（纯文件镜像，绝不调 chezmoi CLI）
 chezmoi apply
 ```
 
-机制（`sync-skills.js`，不依赖 chezmoi CLI，避免 apply 期间嵌套调用死锁）：
+选项：`--mode add|chezmoi|raw`、`--yes`（跳过确认）、`--commit`（只提交）、`--push`（提交并推送）。
+**无 TTY（自动调用）时永不询问、永不提交**，只写盘 + `git add`。
+
+| 模式 | 谁为准 | 落地动作 | 用在哪 |
+|---|---|---|---|
+| `add`（默认） | 本地 `~/.agents` | `chezmoi add --force ~/.agents` | 你改了 `~/.agents` 下的脚本 / 清单 / README / skill |
+| `chezmoi` | chezmoi 源 | `chezmoi apply --force` | 改动都在源里、工作副本还没动 |
+| `raw` | 双向纯文件镜像 | Node `fs` 复制，不碰 CLI | run_ 脚本自动跑。`chezmoi apply` 期间**不能**嵌套调 chezmoi（会抢状态库锁卡死） |
+
+机制（上游同步部分三种模式相同）：
 
 1. 逐源浅克隆/拉取上游到 `~/.cache/skills-upstream/<cache>`；
 2. 对清单里每个 skill，把 **目标**（`~/.agents/skills/`）与 **chezmoi 源**（`dot_agents/skills/`）同时镜像为上游内容（`rm`+`cp`，增/改/删全处理）；
 3. `retired.skills`（上游已弃用）从两处删除，例如 `resolving-merge-conflicts`；
 4. 跑 `ensureLinks()` 对齐三端 junction（补建新 skill、清除悬挂链接）；
-5. 把 `~/.agents/` 下这些**工作副本**镜像进 chezmoi 源（消除漂移，否则 `chezmoi apply` 会因「源与目标都改了」而交互询问）：`README.md`、`skills-sources.json`、`skill-links.js`、`sync-skills.js`、`link-all.js`、`link-skill.js`；
-6. `git add -A dot_agents`，纳入版本控制（除非 `--commit` 否则不提交）。
+5. 按所选模式对齐工作副本与 chezmoi 源；
+6. `git add -A dot_agents`，随后**列出待提交改动**；只有带 `--commit`/`--push`（交互时还需你确认）才提交。
 
-所以**日常只需改 `~/.agents/` 下的文件，再跑一次 `node ~/.agents/sync-skills.js`**，源目录会被自动对齐。
+> 源里所有 `.js` 带 `executable_` 前缀（Windows 的 `PATHEXT` 含 `.JS`，chezmoi 视为可执行）；`sync-skills.js` 的映射表已按此写死，不要手改文件名。
 
-同步后记得 `chezmoi cd && git push`。某一源网络失败时沿用本地缓存并告警，不会中断其余源。
+同步后如需推送但没带 `--push`：`chezmoi cd && git push`。某一源网络失败时沿用本地缓存并告警，不会中断其余源。
 
 关闭自动同步：在 chezmoi 源目录重命名/删除 `run_sync-skills.ps1` 并 commit。
 
@@ -73,7 +83,7 @@ chezmoi apply
 
 - **加**：在 `skills-sources.json` 对应源的 `skills` 数组里加名字，跑 `node ~/.agents/sync-skills.js`，会自动下载并建链。
 - **删**：从数组移除；若是「上游彻底删掉」的 skill，改记入 `retired.skills` 以便下次同步清除本地残留。
-- **改工作副本**：改 `~/.agents/` 下的 README / 脚本 / 清单后跑一次 `node ~/.agents/sync-skills.js` 让它镜像进 chezmoi 源（见上面第 5 步），再 `chezmoi cd && git push`。
+- **改工作副本**：改 `~/.agents/` 下的 README / 脚本 / 清单后跑 `node ~/.agents/sync-skills.js --mode add`，再 `--push`。
 - 全局配置的通用流程（含模板、`chezmoi add`、危险动作边界）见 skill `~/.agents/skills/chezmoi/`（手动 `/chezmoi`）。
 
 ## 已停用的其他技能管理器（2026-10-13）

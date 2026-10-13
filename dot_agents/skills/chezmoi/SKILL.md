@@ -35,16 +35,22 @@ chezmoi managed          # 当前被管理的全部文件
 ## 2. skill 目录的特殊规则
 
 `~/.agents/skills/` 是 canonical 真身，三端（claude/codex/cursor）是指向它的 junction。
-**官方 skill 用清单同步，不要手改**：
+**官方 skill 用清单同步，不要手改**（清单 `~/.agents/skills-sources.json`；本地自建 skill 不在清单里，永不被覆盖）：
 
 ```bash
-node ~/.agents/sync-skills.js            # 同步上游最新（手动）
-node ~/.agents/sync-skills.js --commit   # 同步并提交
-node ~/.agents/link-all.js               # 对齐三端软链（幂等）
+# 本地为准（默认）：同步上游 → chezmoi add --force 把工作副本收进源并记账
+node ~/.agents/sync-skills.js --mode add            # 只会写盘 + git add
+node ~/.agents/sync-skills.js --mode add --commit    # 跑完列改动，确认后提交
+node ~/.agents/sync-skills.js --mode add --push      # 提交并推送
+
+# 源为准：同步上游写进源 → chezmoi apply --force 把源内容推到 ~
+node ~/.agents/sync-skills.js --mode chezmoi
+
+node ~/.agents/link-all.js                           # 单独对齐三端软链（幂等）
 ```
 
-来源清单在 `~/.agents/skills-sources.json`；本地自建 skill 不在清单里，永不被覆盖。
-`run_sync-skills.ps1` 会在**每次 `chezmoi apply`** 时自动跑一次同步。
+选项：`--mode add|chezmoi|raw`、`--yes`、`--commit`、`--push`。无 TTY 时永不询问、永不提交。
+`run_sync-skills.ps1` 会在**每次 `chezmoi apply`** 时以 `--mode raw`（纯文件镜像，不调 chezmoi CLI——apply 期间嵌套调 chezmoi 会抢状态库锁卡死）自动跑一次同步。
 
 ## 3. 改全局配置的标准流程
 
