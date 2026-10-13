@@ -201,8 +201,9 @@ if (mode === 'raw' || !chezmoiBin) {
 }
 
 // 6. 纳入版本控制(原子处理增/改/删)
+//    用 -A 全仓暂存: run_ 脚本在源目录根部,不在 dot_agents/ 下,只 add dot_agents 会漏掉它。
 if (fs.existsSync(sourceSkills)) {
-  sh(`git -C "${sourceRoot}" add -A dot_agents`);
+  sh(`git -C "${sourceRoot}" add -A`);
 }
 
 if (changed.size) console.log(`已更新 ${changed.size} 个官方 skill: ${[...changed].sort().join(', ')}`);
