@@ -1,6 +1,7 @@
-# ~/.bashrc: executed by bash for non-login interactive shells.
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# Based on Ubuntu /etc/skel/.bashrc, plus local tooling.
 
-# Proxy helpers (available in non-interactive shells too — must be before the early return)
+# Proxy helpers (available in non-interactive shells too — before early return)
 [ -f "$HOME/.config/shell/proxy.sh" ] && . "$HOME/.config/shell/proxy.sh"
 
 # If not running interactively, don't do anything
@@ -8,6 +9,81 @@ case $- in
   *i*) ;;
     *) return ;;
 esac
+
+# --- history ---
+# don't put duplicate lines or lines starting with space in the history
+HISTCONTROL=ignoreboth
+# append to the history file, don't overwrite it
+shopt -s histappend
+HISTSIZE=5000
+HISTFILESIZE=10000
+# write history after each command (shared across terminals)
+PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a"
+
+# check the window size after each command
+shopt -s checkwinsize
+
+# make less more friendly for non-text input files
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+# set variable identifying the chroot (used in the prompt below)
+if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+  debian_chroot=$(cat /etc/debian_chroot)
+fi
+
+# Cursor / modern terminals: prefer a colored prompt
+case "$TERM" in
+  xterm-color|*-256color|xterm-ghostty|alacritty|screen*|tmux*) color_prompt=yes ;;
+esac
+force_color_prompt=yes
+
+if [ -n "$force_color_prompt" ]; then
+  if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+    color_prompt=yes
+  else
+    color_prompt=
+  fi
+fi
+
+if [ "$color_prompt" = yes ]; then
+  PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+else
+  PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+fi
+unset color_prompt force_color_prompt
+
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+  xterm*|rxvt*|screen*|tmux*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    ;;
+esac
+
+# enable color support of ls / grep
+if [ -x /usr/bin/dircolors ]; then
+  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+  alias ls='ls --color=auto'
+  alias grep='grep --color=auto'
+  alias fgrep='fgrep --color=auto'
+  alias egrep='egrep --color=auto'
+fi
+
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+if [ -f ~/.bash_aliases ]; then
+  . ~/.bash_aliases
+fi
+
+# programmable completion
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
 
 # uv / user local bin
 [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"

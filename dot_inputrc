@@ -1,0 +1,17 @@
+# Readline: history search + completion UX (used by bash in Cursor terminal)
+
+# Up/Down search history by current prefix (type partial command, then ↑)
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+# keypad / application mode variants
+"\eOA": history-search-backward
+"\eOB": history-search-forward
+
+# Tab completion: show matches immediately when ambiguous
+set show-all-if-ambiguous on
+set completion-ignore-case on
+set colored-stats on
+set visible-stats on
+
+# Don't bell on completion
+set bell-style none
