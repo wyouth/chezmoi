@@ -39,7 +39,7 @@
 
 本地自建、不由任何上游提供的 skill：`chezmoi`、`ship-sync`、`hermes-log`、`test-review-daily`——**不写进清单**，永不被同步覆盖或删除。
 
-`chezmoi`（手动 `/chezmoi`，也可由模型在改全局配置前自动加载）是「改全局配置」的统一入口：改全局配置 / agent 全局规则（`~/.codex/AGENTS.md`）/ Claude 专用规则（`~/.claude/CLAUDE.md`）/ agent 全局目录前都先走它，真身在 chezmoi 源目录 `~/.local/share/chezmoi`，`~` 下只是 apply 出来的副本。
+`chezmoi`（手动 `/chezmoi`，也可由模型在改全局配置前自动加载）是「改全局配置」的统一入口：改全局配置 / Codex 全局规则（`~/.codex/AGENTS.md`）/ Cursor 全局规则（`~/.cursor/rules/`）/ Claude 专用规则（`~/.claude/CLAUDE.md`）/ agent 全局目录前都先走它，真身在 chezmoi 源目录 `~/.local/share/chezmoi`，`~` 下只是 apply 出来的副本。
 
 ### 更新官方 skill（三种模式）
 

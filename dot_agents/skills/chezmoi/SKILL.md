@@ -1,6 +1,6 @@
 ---
 name: chezmoi
-description: 管理本机全局配置（dotfiles）的唯一入口。任何要新增/修改/删除「全局配置」的动作都必须走本 skill：全局配置文件、agent 全局规则（~/.codex/AGENTS.md）、Claude 专用规则（~/.claude/CLAUDE.md）、agent 全局目录（~/.agents/**、~/.claude、~/.codex、~/.cursor）、shell/npm/git 全局配置，真身都在 chezmoi 源目录。MUST trigger when the user says "/chezmoi", "改全局配置", "全局设置", "加到 dotfiles", "chezmoi", "同步 dotfiles", "这台机器的配置", "全局 skill 配置", or when you are about to edit any file under the user's home that chezmoi already manages. Also trigger before running `chezmoi apply`. 手动调用：/chezmoi；自动调用：模型在改全局配置前自行加载。
+description: 管理本机全局配置（dotfiles）的唯一入口。任何要新增/修改/删除「全局配置」的动作都必须走本 skill：全局配置文件、agent 全局规则（~/.codex/AGENTS.md）、Cursor 全局规则（~/.cursor/rules/）、Claude 专用规则（~/.claude/CLAUDE.md）、agent 全局目录（~/.agents/**、~/.claude、~/.codex、~/.cursor）、shell/npm/git 全局配置，真身都在 chezmoi 源目录。MUST trigger when the user says "/chezmoi", "改全局配置", "全局设置", "加到 dotfiles", "chezmoi", "同步 dotfiles", "这台机器的配置", "全局 skill 配置", or when you are about to edit any file under the user's home that chezmoi already manages. Also trigger before running `chezmoi apply`. 手动调用：/chezmoi；自动调用：模型在改全局配置前自行加载。
 ---
 
 # chezmoi — 全局配置的唯一入口
@@ -24,7 +24,8 @@ chezmoi managed          # 当前被管理的全部文件
 | 源目录（`~/.local/share/chezmoi/`） | 部署到 | 说明 |
 |---|---|---|
 | `dot_agents/` | `~/.agents/` | skill 真身与脚本（见 2） |
-| `dot_codex/AGENTS.md` | `~/.codex/AGENTS.md` | **agent 全局规则**（跨端指令，如 TypeSafe 门禁） |
+| `dot_codex/AGENTS.md` | `~/.codex/AGENTS.md` | Codex 全局规则（如 TypeSafe 门禁） |
+| `dot_cursor/rules/` | `~/.cursor/rules/` | Cursor 全局规则（`.mdc`，如 TypeSafe 门禁） |
 | `dot_claude/CLAUDE.md` | `~/.claude/CLAUDE.md` | Claude 专用：代理用法、失败处理 |
 | `dot_gitconfig` | `~/.gitconfig` | git 全局配置 |
 | `dot_npmrc` | `~/.npmrc` | npm 全局配置 |
