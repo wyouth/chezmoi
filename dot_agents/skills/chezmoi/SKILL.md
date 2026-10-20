@@ -61,8 +61,9 @@ node ~/.agents/link-all.js                           # 单独对齐三端软链�
    - 新增文件同样用 `chezmoi add <路径>`（会按规则生成 `dot_*` 名）。
 3. **干跑**：`chezmoi apply -n -v` 看会写哪些文件。
 4. **落地**：`chezmoi apply`（会覆盖 `~` 下对应副本，并触发 run_ 脚本）。
-5. **提交**：`chezmoi cd` → `git add -A && git commit -m "..." && git push`
+5. **提交并推送（默认）**：`chezmoi cd` → `git add -A && git commit -m "..." && git push`
    （远程 `git@github.com:wyouth/chezmoi.git`，SSH，已验证可用）。
+   **提交后默认 `git push`，不要等用户再说「推一下」**；仅当用户明确说不要推、或 push 失败时才停下来说明。
 
 ## 4. 边界与危险动作
 
