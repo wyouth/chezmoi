@@ -1,2 +1,9 @@
 # 防御:任何 skill 若内部混入 .git(克隆的仓库),不进 chezmoi
 dot_agents/skills/**/.git
+
+# OS 专用 run_ 脚本：Windows 用 .ps1，Unix 用 .sh（按目标名匹配）
+{{- if eq .chezmoi.os "windows" }}
+sync-skills.sh
+{{- else }}
+sync-skills.ps1
+{{- end }}

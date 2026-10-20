@@ -1,0 +1,10 @@
+. "$HOME/.local/bin/env"
+
+# Proxy helpers
+[ -f "$HOME/.config/shell/proxy.sh" ] && . "$HOME/.config/shell/proxy.sh"
+
+# fnm (Node version manager)
+export PATH="$HOME/.local/share/fnm:$PATH"
+if command -v fnm >/dev/null 2>&1; then
+  eval "$(fnm env --shell zsh)"
+fi
