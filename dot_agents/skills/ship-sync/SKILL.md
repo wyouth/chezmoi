@@ -1,6 +1,6 @@
 ---
 name: ship-sync
-description: 同步本地改动并推送。默认手动：拉取前 code-review 硬门禁，通过后确认包，用户确认再 commit/push。参数 auto：自动审核，按需 neat-freak，修阻塞项，最多 5 轮直至通过后直接 commit 并 push。
+description: 同步本地改动并推送。默认手动：拉取前 code-review 硬门禁，通过后确认包，用户确认再 commit/push。参数 auto：自动审核，按需 neat-freak，修阻塞项，默认最多 3 轮；再加 force 则最多 5 轮，通过后直接 commit 并 push。
 disable-model-invocation: true
 ---
 
@@ -10,23 +10,25 @@ disable-model-invocation: true
 
 ## 模式选择
 
-在动手前判定模式（整次调用只选一次）：
+在动手前判定模式与门禁轮次上限（整次调用只选一次）：
 
-| 调用 | 模式 |
-| --- | --- |
-| `/ship-sync`（无参） | **manual**（默认） |
-| `/ship-sync auto` / `/ship-sync --auto` | **auto** |
+| 调用 | 模式 | `maxRounds` |
+| --- | --- | --- |
+| `/ship-sync`（无参） | **manual**（默认） | （无闭环） |
+| `/ship-sync auto` / `/ship-sync --auto` | **auto** | **3**（默认） |
+| `/ship-sync auto force` / `/ship-sync --auto --force` / `/ship-sync auto --force` | **auto** | **5** |
 
 - **manual**：阶段 A 只准备并停住；阶段 B 仅在用户确认后才 commit + push。
-- **auto**：自动门禁与修复闭环（最多 5 轮）；门禁通过且无待决冲突后，**直接**走阶段 B（视为用户已确认），不再等「确认」回复。
+- **auto**：自动门禁与修复闭环（默认最多 **3** 轮；调用含 `force` / `--force` 时最多 **5** 轮）；门禁通过且无待决冲突后，**直接**走阶段 B（视为用户已确认），不再等「确认」回复。
+- **ship-sync 的 `force`**：只放大 auto 门禁轮次上限；**不等于**授权 `git push --force` / `reset --hard`。
 
 ## 硬约束
 
 - 不改 git config；不用 `-i`；不用 `--no-verify`（除非用户明确要求）。
 - 不提交疑似密钥文件（`.env`、`credentials.json` 等）；若用户点名要提交，先警告。
 - **拟提交 = 工作区全部本地改动**（见下节）：不是「本次功能范围内的文件」、不是「与主题相关的子集」；除非用户另有说明，一次 ship-sync 提交工作区里能看见的全部合法改动。
-- **manual**：阶段 A 结束前不 `commit`、不 `push`、不 `--force`；门禁未通过则硬停（不 stash、不 pull、不生成可继续同步的确认包）。
-- **auto**：允许在闭环内改代码/文档以消除阻塞；**通过门禁且无待决冲突之前**仍不 `commit`/`push`；通过后直接阶段 B。`--force` / `reset --hard` 仍禁止（除非用户本轮明确要求）。
+- **manual**：阶段 A 结束前不 `commit`、不 `push`、不 `git push --force`；门禁未通过则硬停（不 stash、不 pull、不生成可继续同步的确认包）。
+- **auto**：允许在闭环内改代码/文档以消除阻塞；**通过门禁且无待决冲突之前**仍不 `commit`/`push`；通过后直接阶段 B。`git push --force` / `reset --hard` 仍禁止（除非用户本轮明确要求）。
 - 用户明确「忽略门禁继续」时，两种模式均可跳过未通过的门；须在摘要/确认包中标注已忽略及原因。
 
 ## 拟提交集合（全部本地文件，非「范围内」）
@@ -191,34 +193,39 @@ git stash pop
 
 ## Auto 模式
 
-触发：`/ship-sync auto` 或 `/ship-sync --auto`。调用即视为授权：门禁通过后直接 commit + push（等价于确认包已确认），无需再问「确认」。
+触发：`/ship-sync auto` / `/ship-sync --auto`（可选再加 `force` / `--force`）。调用即视为授权：门禁通过后直接 commit + push（等价于确认包已确认），无需再问「确认」。
+
+动手前定死本轮上限：
+
+- **默认** `maxRounds = 3`
+- 调用含 **`force` / `--force`**（ship-sync 参数）→ `maxRounds = 5`
 
 共用上文「拟提交集合」「Commit 文案」「失败与回滚」；stash / pull / pop / 冲突规则与 A3–A6 相同。
 
-### 总流程（最多 5 轮）
+### 总流程（最多 `maxRounds` 轮）
 
 ```text
-摸清现状 → [轮次 1..5: 门禁 → 按需 neat-freak → 修阻塞项 → 再门禁]
+摸清现状 → [轮次 1..maxRounds: 门禁 → 按需 neat-freak → 修阻塞项 → 再门禁]
          → 通过后：A3–A6（stash/pull/pop/冲突）
          → 无待决冲突则直接阶段 B（commit + push）
 ```
 
 **一轮** = 一次完整 code-review 门禁 +（若触发）neat-freak + 对**必要阻塞项**的修复 + 复审准备。  
-`round` 从 1 计到 5；第 5 轮复审仍未通过则**硬停**，不 stash/pull/commit/push。
+`round` 从 1 计到 `maxRounds`；第 `maxRounds` 轮复审仍未通过则**硬停**，不 stash/pull/commit/push。
 
 ### Auto-1. 摸清现状
 
-同 A1。额外记录：`mode=auto`、`round=0`（尚未开审）。
+同 A1。额外记录：`mode=auto`、`maxRounds`（3 或 5）、`round=0`（尚未开审）。
 
 ### Auto-2. 门禁闭环（拉取之前）
 
-对每一轮 `round = 1..5`：
+对每一轮 `round = 1..maxRounds`：
 
 1. **code-review**（同 A2 规则与基线；始终执行）。
 2. **判定**：
    - **通过** → 记下门禁摘要，跳出闭环，进入 Auto-3。
-   - **未通过** 且 `round == 5` → 硬停：输出各轮摘要与仍未消除的阻塞项；停止。
-   - **未通过** 且 `round < 5` → 进入本轮修复（下两步），然后 `round += 1` 复审。
+   - **未通过** 且 `round == maxRounds` → 硬停：输出各轮摘要与仍未消除的阻塞项；停止。
+   - **未通过** 且 `round < maxRounds` → 进入本轮修复（下两步），然后 `round += 1` 复审。
 
 #### 何时跑 neat-freak
 
@@ -245,7 +252,7 @@ git stash pop
 
 本轮有实际写盘后，必须带着**更新后的全量工作区**再跑 code-review（计入下一 `round`）。
 
-完成标准：门禁通过且 `round ≤ 5`；或第 5 轮仍失败并已硬停。
+完成标准：门禁通过且 `round ≤ maxRounds`；或第 `maxRounds` 轮仍失败并已硬停。
 
 ### Auto-3. 保全 / 拉取 / 恢复 / 冲突
 
@@ -268,8 +275,8 @@ git stash pop
 
 ```markdown
 ## Auto 完成摘要
-- 模式：auto
-- 轮次：N / 5（neat-freak：做过 / 跳过）
+- 模式：auto（force：是 / 否）
+- 轮次：N / maxRounds（neat-freak：做过 / 跳过）
 - 门禁：通过
 - commit：
 - push：
@@ -282,7 +289,7 @@ git stash pop
 
 | 条件 | 动作 |
 | --- | --- |
-| 5 轮后门禁仍未通过 | 输出待改项；停止 |
+| `maxRounds` 轮后门禁仍未通过 | 输出待改项；停止 |
 | 疑似密钥无法安全排除且阻塞提交 | 停止并警告 |
 | neat-freak/修复出现需用户裁决的待决且仍阻塞 | 停止 |
 | 不确定 merge 冲突 | 保留标记；停止 |
@@ -309,20 +316,20 @@ git stash pop
 | 场景 | 处理 |
 |------|------|
 | 门禁未通过（manual） | 硬停；不 stash/pull；列出待改项 |
-| 门禁未通过（auto，未满 5 轮） | 按需 neat-freak + 修阻塞项后复审 |
-| 门禁未通过（auto，第 5 轮） | 硬停；不 stash/pull/commit/push |
+| 门禁未通过（auto，未满 `maxRounds`） | 按需 neat-freak + 修阻塞项后复审 |
+| 门禁未通过（auto，第 `maxRounds` 轮） | 硬停；不 stash/pull/commit/push |
 | pull 失败（网络/权限） | 停止；若已 stash，说明用 `git stash pop` 恢复 |
 | merge 无法自动解决 | 保留冲突；manual 写入确认包；auto 硬停 |
 | stash pop 冲突 | 不 drop stash（若仍存在）；列出冲突文件 |
-| push 被拒绝 | 不 force；说明需再 pull 或用户决策 |
+| push 被拒绝 | 不 `git push --force`；说明需再 pull 或用户决策 |
 | 用户放弃 | 不 commit/push；说明如何 `stash pop` / `merge --abort`（仅在 merge 未完成且安全时） |
 
 ## 禁止
 
 - manual：阶段 A 偷偷 commit/push；无确认就 push
-- auto：门禁未通过或存在待决不确定冲突时 commit/push；超过 5 轮仍强行提交
+- auto：门禁未通过或存在待决不确定冲突时 commit/push；超过 `maxRounds` 轮仍强行提交
 - 门禁未通过仍 stash/pull（除非用户本轮明确忽略门禁，或处于 auto 且**本轮门禁已通过**之后）
-- `push --force` / `reset --hard`（除非用户在本轮明确要求）
+- `git push --force` / `reset --hard`（除非用户在本轮明确要求；ship-sync 参数 `force` 不授权此类操作）
 - 把确认包拆成多次零散提问（冲突不确定项与门禁项可列在包内，一次性问清）
 - 先 pull / stash 再做门禁（门禁必须针对拉取前的本地改动；auto 修复轮次同样在 pull 之前）
 - **按「功能范围 / 主题相关」筛选拟提交文件**（未获用户「只提交…」指令时，必须全量本地改动）
