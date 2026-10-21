@@ -1,12 +1,24 @@
 # 全局 Agent 规则
 
+## 网络代理
+
+默认代理：`127.0.0.1:7890`。Helper：`~/.config/shell/proxy.sh`。
+
+外网失败（超时、连接重置、TLS 失败、区域封锁如 HTTP 451、GitHub/npm/`uv`/TypeSafe 不可达）：**先 `proxy_on`，再重试一次**，不要先问用户。
+
+```bash
+. "$HOME/.config/shell/proxy.sh" && proxy_on >/dev/null
+```
+
+工具校验失败、权限错误、真实 404/403 不要靠换代理硬扛。WebFetch/WebSearch 主进程不走 shell 代理。
+
 ## TypeSafe 门禁
 
 动手执行任务前：加载 `typesafe-ai`，用 Jev 判断当前方案是否可执行。
 
 - **通过** → 再执行。
 - **未通过** → 先改方案，复判通过后再动手；不得带着未通过的方案执行。
-- **Jev 不可用** → 简短说明后自行推进，不得声称已通过。
+- **Jev 调用失败** → 先按上方开代理重试一次；仍不可用则简短说明后自行推进，不得声称已通过。
 
 <!-- CODEGRAPH_START -->
 ## CodeGraph

@@ -1,0 +1,28 @@
+---
+description: 外网失败时自动 proxy_on 后重试一次
+alwaysApply: true
+---
+
+# 网络代理
+
+默认代理：`127.0.0.1:7890`（HTTP/HTTPS + SOCKS5，本机 Clash 混合端口）。Helper：`~/.config/shell/proxy.sh`（`proxy_on` / `proxy_off` / `proxy_status`）。
+
+## 何时启用
+
+Shell 访问外网失败时（超时、连接重置、TLS 失败、区域封锁如 HTTP 451、GitHub/npm/`uv`/TypeSafe API 不可达等）：**先 `proxy_on`，再重试同一命令一次**。不要先问用户。
+
+```bash
+. "$HOME/.config/shell/proxy.sh" && proxy_on >/dev/null
+# 然后重跑原命令（同一 shell 会话内后续外网命令可继续用）
+```
+
+单条命令也可不持久开启，直接带环境变量重试：
+
+```bash
+http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 ALL_PROXY=socks5://127.0.0.1:7890 <原命令>
+```
+
+## 边界
+
+- 只对**网络类**失败自动开代理；工具校验失败、权限错误、真实 404/403 不要靠换代理硬扛。
+- Cursor 主进程的 WebFetch / WebSearch 不走 Agent shell 的 `proxy_on`；那种失败如实说明即可。

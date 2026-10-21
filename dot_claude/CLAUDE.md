@@ -18,9 +18,16 @@ proxy_status
 
 `proxy_on` 只影响**当前 shell 进程**及其子进程。
 
-### Agent 单次命令（推荐）
+### Agent：外网失败 → 自动 `proxy_on` 再试一次
 
-访问外网（GitHub、npm、`uv sync` 等）失败时，带代理重试**一次**——用单条命令临时环境变量，不要指望已在别处执行过的 `proxy_on`：
+访问外网（GitHub、npm、`uv sync`、TypeSafe API 等）失败时（超时、连接重置、TLS 失败、区域封锁如 HTTP 451）：**不要先问用户**，在同一 shell 里开启代理后重试**一次**：
+
+```bash
+. "$HOME/.config/shell/proxy.sh" && proxy_on >/dev/null
+# 然后重跑原命令
+```
+
+单条命令也可临时带环境变量（不依赖已执行过的 `proxy_on`）：
 
 ```bash
 http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 ALL_PROXY=socks5://127.0.0.1:7890 <原命令>
