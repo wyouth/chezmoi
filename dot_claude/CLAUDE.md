@@ -45,6 +45,16 @@ http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 ALL_PROXY=soc
 - 如实告诉用户失败原因，不要反复重试；
 - **不要绕**：不要为了拿到内容改用别的方式绕过工具自身的校验限制。
 
+## Git 提交信息
+
+全局默认格式（半角括号与冒号，冒号后一个空格）：`类型(模块): 内容`
+
+- **类型**：`feat` | `fix` | `refactor` | `docs` | `test` | `chore`（勿用 `feature`）
+- **模块**：短英文标识（如 `frontend`、`backend`、`deploy`、`infra`、`docs`、`repo`）
+- **内容**：单句中文；示例：`feat(frontend): 增加任务列表筛选`
+
+仓库若另有强制规范则以仓库为准；否则一律用本格式（含 `/ship-sync`）。
+
 <!-- CODEGRAPH_START -->
 ## CodeGraph
 

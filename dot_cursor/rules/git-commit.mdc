@@ -1,0 +1,20 @@
+---
+description: Git 提交信息全局默认格式——类型(模块): 中文内容
+alwaysApply: true
+---
+
+# Git 提交信息
+
+全局默认格式（半角括号与冒号，冒号后一个空格）：
+
+```text
+类型(模块): 内容
+```
+
+- **类型**：`feat` | `fix` | `refactor` | `docs` | `test` | `chore`（勿用 `feature`）
+- **模块**：短英文标识（如 `frontend`、`backend`、`deploy`、`infra`、`docs`、`repo`）；跨包取主影响面或用 `repo`
+- **内容**：单句中文，说明本次变更效果；勿在 subject 写 `1. 2.` 多点清单
+
+示例：`feat(frontend): 增加任务列表筛选`
+
+仓库 `AGENTS.md` / `CONTRIBUTING.md` 若另有强制规范，以该仓库为准；否则一律用本格式（含 `/ship-sync`）。

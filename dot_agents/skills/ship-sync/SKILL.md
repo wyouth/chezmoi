@@ -163,7 +163,7 @@ git stash pop
 - 排除项（仅密钥/产物/用户已点名；说明原因；无则写「无」）
 
 ### 拟 commit 信息
-类型（模块）：内容
+类型(模块): 内容
 
 ### 拟执行
 - [ ] 按你的冲突决定完成合并
@@ -299,15 +299,15 @@ git stash pop
 
 ## Commit 文案（全局默认）
 
-格式：`类型（模块）：内容`
+格式：`类型(模块): 内容`（半角括号与冒号，冒号后一个空格；与全局 Cursor/Codex/Claude 规则一致）
 
-- **类型**：`feature` | `fix` | `refactor` | `docs` | `test` | `chore`
-- **模块**：短英文标识（如 `frontend`、`backend`、`deploy`）
-- **内容**：中文，说明为什么改 / 改动要点
+- **类型**：`feat` | `fix` | `refactor` | `docs` | `test` | `chore`（勿用 `feature`）
+- **模块**：短英文标识（如 `frontend`、`backend`、`deploy`、`infra`、`docs`、`repo`）
+- **内容**：单句中文，说明本次变更效果
 
-示例：`feature（frontend）：增加任务列表筛选`
+示例：`feat(frontend): 增加任务列表筛选`
 
-项目若另有强制 commit 规范（如 `feat(module): …`），以**当前仓库规则**为准，本全局默认仅在无项目规范时使用。
+仓库 `AGENTS.md` / `CONTRIBUTING.md` 若另有强制规范，以**当前仓库**为准；否则一律用本全局默认（含无规范的仓库，如仅写「中文 commit」的仓）。
 
 依据 `git diff` 起草 1 条信息；manual 放入确认包供用户改；auto 直接用于 commit（用户若在调用时写了文案则优先用用户文案）。
 
