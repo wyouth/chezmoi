@@ -1,11 +1,13 @@
 # WSL / Unix shell proxy helpers (bash & zsh).
-# Source from ~/.bashrc / ~/.zshrc. Does not auto-enable.
+# Source from ~/.bashrc / ~/.zshrc. Those rc files call proxy_on by default;
+# this file itself only defines helpers.
 #
 #   proxy_on              # http/https + socks5 → 127.0.0.1:7890
 #   proxy_on 7890         # same host, override port (http & socks)
 #   proxy_on 127.0.0.1:7890
 #   proxy_off
 #   proxy_status
+
 
 : "${PROXY_HOST:=127.0.0.1}"
 : "${PROXY_HTTP_PORT:=7890}"

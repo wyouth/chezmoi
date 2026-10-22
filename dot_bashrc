@@ -3,6 +3,9 @@
 
 # Proxy helpers (available in non-interactive shells too — before early return)
 [ -f "$HOME/.config/shell/proxy.sh" ] && . "$HOME/.config/shell/proxy.sh"
+# Default on (like Windows system proxy); use proxy_off to disable for this shell
+command -v proxy_on >/dev/null 2>&1 && proxy_on >/dev/null
+
 
 # If not running interactively, don't do anything
 case $- in

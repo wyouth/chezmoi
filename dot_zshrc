@@ -2,6 +2,9 @@
 
 # Proxy helpers
 [ -f "$HOME/.config/shell/proxy.sh" ] && . "$HOME/.config/shell/proxy.sh"
+# Default on (like Windows system proxy); use proxy_off to disable for this shell
+command -v proxy_on >/dev/null 2>&1 && proxy_on >/dev/null
+
 
 # fnm (Node version manager)
 export PATH="$HOME/.local/share/fnm:$PATH"
