@@ -45,6 +45,14 @@ http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 ALL_PROXY=soc
 - 如实告诉用户失败原因，不要反复重试；
 - **不要绕**：不要为了拿到内容改用别的方式绕过工具自身的校验限制。
 
+## 容器运行时：优先 wslc
+
+本机（WSL / Windows）跑 Linux 容器时：**优先用 `wslc`**（WSL Containers），不要默认用 Docker Desktop / `docker`。
+
+- 适用：本地单容器 `run` / `build` / `pull` / `exec` / `logs` 等日常循环。
+- 仍用 Docker：Compose 多服务、Swarm/K8s、buildx 多架构、Testcontainers / Docker socket、或环境无 `wslc` / 该能力不支持。
+- 偏好而非禁令；用户或仓库明确要求 Docker 时从其要求。CI/生产管线不要为换 wslc 而改。
+
 ## Git 提交信息
 
 全局默认格式（半角括号与冒号，冒号后一个空格）：`类型(模块): 内容`
