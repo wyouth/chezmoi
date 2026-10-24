@@ -5,6 +5,8 @@
 # Default on (like Windows system proxy); use proxy_off to disable for this shell
 command -v proxy_on >/dev/null 2>&1 && proxy_on >/dev/null
 
+# Local secrets (TYPESAFE_API_KEY etc.) — file is NOT chezmoi-managed
+[ -f "$HOME/.config/shell/secrets.sh" ] && . "$HOME/.config/shell/secrets.sh"
 
 # fnm (Node version manager)
 export PATH="$HOME/.local/share/fnm:$PATH"

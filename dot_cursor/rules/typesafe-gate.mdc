@@ -7,6 +7,12 @@ alwaysApply: true
 
 动手执行任务前：加载 `typesafe-ai`，用 Jev 判断当前方案是否可执行。
 
+调用 Jev 前先加载本地密钥（Agent 非交互 shell 不一定读 bashrc）：
+
+```bash
+[ -f "$HOME/.config/shell/secrets.sh" ] && . "$HOME/.config/shell/secrets.sh"
+```
+
 - **通过** → 再执行。
 - **未通过** → 先改方案，复判通过后再动手；不得带着未通过的方案执行。
 - **Jev 调用失败** → 先按 `network-proxy` 规则 `proxy_on` 后重试一次；仍不可用则简短说明后自行推进，不得声称已通过。
