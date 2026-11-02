@@ -362,9 +362,8 @@ if (mode === 'raw' || !chezmoiBin) {
   rawMirrorAgentFiles();
 } else if (mode === 'add') {
   // 本地为准：把工作副本（含 skills 与脚本/清单/README）收进源，并更新 chezmoi 状态
-  const skillTargets = requestedSkills.size
-    ? [...requestedSkills].map(name => path.join(skillsRoot, name))
-    : [skillsRoot];
+  // 始终逐个收取来源清单中的 skill，避免把本地自建 skill 或项目软链带进 chezmoi。
+  const skillTargets = [...byName.keys()].map(name => path.join(skillsRoot, name));
   const targets = [...skillTargets, ...AGENT_FILES.map(([n]) => path.join(agentsDir, n))]
     .filter(p => fs.existsSync(p))
     .map(p => `"${p}"`)
