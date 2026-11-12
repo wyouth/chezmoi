@@ -1,5 +1,5 @@
 ---
-name: build-631-arm-images
+name: 79-arm-build-image
 description: 在 79 服务器拉取 631 后端与核心侧指定分支，构建 linux/arm64 镜像，并原子更新 /home/ticp/develop/output/arm 离线交付包。用于“更新 631 ARM 镜像”“重打核心侧/后端离线包”；不负责启动或替换运行中的业务容器。
 ---
 
