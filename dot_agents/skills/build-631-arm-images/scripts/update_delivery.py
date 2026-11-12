@@ -213,7 +213,9 @@ def main() -> int:
 
         readme = readme_path.read_text(encoding="utf-8")
         for values in state.values():
-            readme = replace_required(readme, str(values["old_image"]), str(values["image"]), "README image")
+            # The quickstart always names the TAR, but some revisions do not
+            # repeat the image tag in prose. Replace the tag when present.
+            readme = readme.replace(str(values["old_image"]), str(values["image"]))
             readme = replace_required(
                 readme,
                 values["old_relative"].as_posix(),
