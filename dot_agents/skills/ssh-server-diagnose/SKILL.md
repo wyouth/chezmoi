@@ -26,7 +26,7 @@ description: >
 
 优先用 `~/.ssh/config` 里的 Host 名，不要手写 IP。用户说「79 / ARM 机」→ `79_arm`；说「45 / 开发机」→ `45_dev`。
 
-- `45_dev` — 开发服务器 `172.16.200.45`，用户 `ticp`，x86，兼跳板；代码常在 `/home/ticp/Project/631/`
+- `45_dev` — 开发服务器 `172.16.200.45`，用户 `ticp`，x86，兼跳板；Remote 工作区优先 `/home/ticp/develop/631`（`project` 后端、`resona_ai_core` 核心侧）
 - `79_arm` — ARM 服务器 `172.16.20.79`（经 `ProxyJump 45_dev`），用户 `ticp`，`aarch64`
 
 连不通时先本机：`ssh -o BatchMode=yes -o ConnectTimeout=8 79_arm 'hostname'`。成功应看到主机名；失败停下来报告（密钥、跳板、VPN），不要猜别的主机。
