@@ -11,7 +11,7 @@ description: 在 79 服务器拉取 631 后端与核心侧指定分支，构建 
 - 核心侧：`/home/ticp/app/projects/631/resona_ai_core`，分支 `develop`，镜像 `resona-worker:<YYYYMMDD>-<sha8>-arm64`
 - 交付目录：`/home/ticp/develop/output/arm`
 
-优先使用现有 SSH 配置 `/home/wyouth/developer/projects/631/.tmp/ragflow79.ssh_config` 的 `ragflow79` 主机。若它不存在，先只读解析用户所称的“79 服务器”，不可猜测目标主机。
+优先使用本机 `~/.ssh/config`（或备用 `/home/wyouth/developer/projects/631/.tmp/ragflow79.ssh_config`）里的 Host `79_server_arm`。用户说「79 / ARM 机」即此主机。若条目不存在，先只读解析用户所称的目标，不可猜测主机。
 
 ## 执行边界
 

@@ -3,7 +3,8 @@ name: ssh-server-diagnose
 description: >
   用 SSH 在远端服务器上定位并修复问题。覆盖两种模式：A Remote-SSH（Agent 在远端工作区）与
   B 本机 Agent + 非交互 ssh。在用户说「连服务器排障」「SSH 查一下」「79 上怎么了」、
-  「Remote-SSH 定位」、或明确要 AI 上机诊断/修复时使用。不替代 79-arm-build-image 的镜像构建流程。
+  「79_server_arm」「45_DEV_server_x86」「Remote-SSH 定位」、或明确要 AI 上机诊断/修复时使用。
+  不替代 79-arm-build-image 的镜像构建流程。
 ---
 
 # SSH 服务器诊断与修复
@@ -23,28 +24,28 @@ description: >
 
 ## 主机别名（本机已配）
 
-优先用 `~/.ssh/config` 里的 Host 名，不要手写 IP：
+优先用 `~/.ssh/config` 里的 Host 名，不要手写 IP。用户说「79 / ARM 机」→ `79_server_arm`；说「45 / 开发机」→ `45_DEV_server_x86`。
 
-- `jump45` — 跳板 `172.16.200.45`，用户 `ticp`
-- `ragflow79` — 目标 `172.16.20.79`（经 `ProxyJump jump45`），用户 `ticp`，`aarch64`
+- `45_DEV_server_x86` — 开发服务器 `172.16.200.45`，用户 `ticp`，x86，兼跳板
+- `79_server_arm` — ARM 服务器 `172.16.20.79`（经 `ProxyJump 45_DEV_server_x86`），用户 `ticp`，`aarch64`
 
-连不通时先本机：`ssh -o BatchMode=yes -o ConnectTimeout=8 ragflow79 'hostname'`。成功应看到主机名；失败停下来报告（密钥、跳板、VPN），不要猜别的主机。
+连不通时先本机：`ssh -o BatchMode=yes -o ConnectTimeout=8 79_server_arm 'hostname'`。成功应看到主机名；失败停下来报告（密钥、跳板、VPN），不要猜别的主机。
 
 备用参考（若 `~/.ssh/config` 缺条目）：仓库内 `.tmp/ragflow79.ssh_config`，用  
-`ssh -F /home/wyouth/developer/projects/631/.tmp/ragflow79.ssh_config -o BatchMode=yes ragflow79 '…'`。
+`ssh -F /home/wyouth/developer/projects/631/.tmp/ragflow79.ssh_config -o BatchMode=yes 79_server_arm '…'`。
 
 ## 模式 A — Remote-SSH
 
 **人先做（Agent 无法代点 Cursor UI）：**
 
-1. `Ctrl+Shift+P` → `Remote-SSH: Connect to Host…` → 选 `ragflow79`（或目标 Host）。
+1. `Ctrl+Shift+P` → `Remote-SSH: Connect to Host…` → 选 `79_server_arm` 或 `45_DEV_server_x86`。
 2. 打开要排障的远端目录（例如 `/home/ticp/app/projects/631`）。
 3. 左下角显示 `SSH: …` 后，**在该窗口**开 Agent 对话描述现象。
 4. 若 Agent 一直 Reconnecting / 连不上模型：Settings → **Remote [SSH: …]** → 搜 `remoteInferenceRoute` → 设为 `always` → `Developer: Reload Window`。
 
 **Agent 在 A 窗口里：**
 
-- Shell 已在远端：直接跑诊断命令，**不要** `ssh ragflow79 '…'`。
+- Shell 已在远端：直接跑诊断命令，**不要**再 `ssh 79_server_arm '…'`。
 - 先取证：`hostname`、`uname -m`、相关 `docker ps` / `systemctl` / 日志路径 / 配置文件。
 - 写操作前说明影响；用户未授权部署/删数据/重启生产时只读。
 - 修完用同一检查命令证明信号变绿。
@@ -54,14 +55,15 @@ description: >
 Agent 终端不能交互登录。一律：
 
 ```bash
-ssh -o BatchMode=yes -o ConnectTimeout=15 ragflow79 '<remote-command>'
+ssh -o BatchMode=yes -o ConnectTimeout=15 79_server_arm '<remote-command>'
 ```
 
 多条远端命令用远端 shell 串起来，一次往返：
 
 ```bash
-ssh -o BatchMode=yes ragflow79 'set -euo pipefail; hostname; docker ps --format "table {{.Names}}\t{{.Status}}" | head'
+ssh -o BatchMode=yes 79_server_arm 'set -euo pipefail; hostname; docker ps --format "table {{.Names}}\t{{.Status}}" | head'
 ```
+
 
 规则：
 
