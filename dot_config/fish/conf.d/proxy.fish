@@ -36,7 +36,7 @@ function proxy_on --description 'Enable HTTP, HTTPS, and SOCKS proxies'
     set -gx HTTP_PROXY $http_proxy
     set -gx HTTPS_PROXY $https_proxy
     set -gx ALL_PROXY $all_proxy
-    set -gx no_proxy 'localhost,127.0.0.1,::1,.local'
+    set -gx no_proxy 'localhost,127.0.0.1,::1,.local,git.modeler.work,.modeler.work'
     set -gx NO_PROXY $no_proxy
 
     echo 'proxy on'

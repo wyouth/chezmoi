@@ -65,7 +65,7 @@ proxy_on() {
   export HTTP_PROXY="$http_proxy"
   export HTTPS_PROXY="$https_proxy"
   export ALL_PROXY="$all_proxy"
-  export no_proxy="localhost,127.0.0.1,::1,.local"
+  export no_proxy="localhost,127.0.0.1,::1,.local,git.modeler.work,.modeler.work"
   export NO_PROXY="$no_proxy"
 
   echo "proxy on"
